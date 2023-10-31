@@ -8,4 +8,4 @@ develop:
 	npx webpack serve
 
 build:
-	NODE_ENV=production npx webpack
+	npm run build
