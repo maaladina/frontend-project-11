@@ -5,12 +5,12 @@ export default (data) => {
     description: parsedData.querySelector('channel description').textContent,
   };
   const posts = Array.from(parsedData.querySelectorAll('item'))
-  .map((item) => (
-    {
-      title: item.querySelector('title').textContent,
-      description: item.querySelector('description').textContent,
-      link: item.querySelector('link').textContent,
-    }
-  ));
-return [feed, posts];
+    .map((item) => (
+      {
+        title: item.querySelector('title').textContent,
+        description: item.querySelector('description').textContent,
+        link: item.querySelector('link').textContent,
+      }
+    ));
+  return [feed, posts];
 };

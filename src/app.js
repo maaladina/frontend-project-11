@@ -1,8 +1,10 @@
 import _ from 'lodash';
+import i18next from 'i18next';
 import validate from './validate.js';
 import fetch from './fetch.js';
 import render from './view.js';
 import parse from './parser.js';
+import ru from './locales/ru.js'
 
 export default () => {
   const elements = {
@@ -24,7 +26,16 @@ export default () => {
     posts: [],
   };
 
-  const watchedState = render(state, elements);
+  const i18nextInstance = i18next.createInstance();
+  i18nextInstance.init({
+    lng: 'ru',
+    debug: false,
+    resources: {
+      ru,
+    },
+  });
+
+  const watchedState = render(state, elements, i18nextInstance);
 
   elements.form.addEventListener('submit', (e) => {
     e.preventDefault();
@@ -32,7 +43,7 @@ export default () => {
     const formData = new FormData(e.target);
     const url = formData.get('url');
     const urls = watchedState.feeds.map((feed) => feed.url);
-    validate(url, urls)
+    validate(url, urls, i18nextInstance)
       .then((validUrl) => {
         watchedState.rssForm.valid = true;
         watchedState.rssForm.state = 'processing';
@@ -54,7 +65,7 @@ export default () => {
         if (err.name === 'ValidationError') {
           watchedState.rssForm.errors = err.message;
         } else if (err.name === 'TypeError') {
-          watchedState.rssForm.errors = 'Ресурс не содержит валидный RSS';
+          watchedState.rssForm.errors = i18nextInstance.t('formValidationStatus.errors.notValidRss');
         }
       });
   });
