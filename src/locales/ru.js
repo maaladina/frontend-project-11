@@ -7,6 +7,7 @@ export default {
         notValidUrl: 'Ссылка должна быть валидным URL',
         notValidRss: 'Ресурс не содержит валидный RSS',
         rssExists: 'RSS уже существует',
+        networkProblems: 'Ошибка сети',
       },
     },
     feeds: 'Фиды',

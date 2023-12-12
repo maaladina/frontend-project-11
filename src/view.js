@@ -12,8 +12,8 @@ const renderFeeds = (state, elements, i18nextInstance) => {
     const ul = elements.feeds.querySelector('ul');
     const feedHTML = [];
     state.feeds.forEach((feed) => feedHTML.push(`<li class="list-group-item border-0 border-end-0">
-    <h3 class="h6 m-0">${feed.title}</h3>
-    <p class="m-0 small text-black-50">${feed.description}</p></li>
+      <h3 class="h6 m-0">${feed.title}</h3>
+      <p class="m-0 small text-black-50">${feed.description}</p></li>
     `));
     const ulHTML = feedHTML.join('');
     ul.innerHTML = ulHTML;
@@ -45,21 +45,35 @@ const renderPosts = (state, elements, i18nextInstance) => {
     `;
     const ul = elements.posts.querySelector('ul');
     const postsHTML = [];
-    state.posts.forEach((posts) => {
-      posts.forEach((post) => postsHTML.push(`
+    state.posts.forEach((post) => {
+      const postClass = state.uiState.visitedIds.has(post.id) ? 'fw-normal link-secondary' : 'fw-bold';
+      postsHTML.push(`
       <li class="list-group-item d-flex justify-content-between align-items-start border-0 border-end-0">
-        <a href="${post.link}" class="fw-bold" data-id="2" target="_blank" rel="noopener noreferrer">${post.title}</a>
-        <button type="button" class="btn btn-outline-primary btn-sm" data-id="2" data-bs-toggle="modal" data-bs-target="#modal">${i18nextInstance.t('posts.button')}</button>
+        <a href="${post.link}" class="${postClass}" data-id="${post.id}" target="_blank" rel="noopener noreferrer">${post.title}</a>
+        <button type="button" class="btn btn-outline-primary btn-sm" data-id="${post.id}" data-bs-toggle="modal" data-bs-target="#modal">${i18nextInstance.t('posts.button')}</button>
       </li>
-      `));
+      `);
     });
     ul.innerHTML = postsHTML.join('');
   } else {
-    elements.post.innerHTML = '';
+    elements.posts.innerHTML = '';
   }
 };
 
-export default (state, elements, i18nextInstance) => onChange(state, (path, value) => {
+const renderVisitedIds = (state, elements) => {
+  const visitedIds = [...state.uiState.visitedIds];
+  const currentId = visitedIds[visitedIds.length - 1];
+  const currentLink = document.querySelector(`a[data-id="${currentId}"]`);
+  currentLink.classList.remove('fw-bold');
+  currentLink.classList.add('fw-normal', 'link-secondary');
+
+  const currentPost = state.posts.find((post) => post.id === currentId);
+  elements.modal.title.textContent = currentPost.title;
+  elements.modal.body.textContent = currentPost.description;
+  elements.modal.link.setAttribute('href', currentPost.link);
+};
+
+export default (state, elements, i18nextInstance) => onChange(state, (path) => {
   switch (path) {
     case 'rssForm.errors':
       renderValidation(state, elements, i18nextInstance);
@@ -69,6 +83,9 @@ export default (state, elements, i18nextInstance) => onChange(state, (path, valu
       break;
     case 'posts':
       renderPosts(state, elements, i18nextInstance);
+      break;
+    case 'uiState.visitedIds':
+      renderVisitedIds(state, elements);
       break;
     default:
       break;
