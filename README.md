@@ -10,4 +10,5 @@ A service for aggregating RSS feeds, with which it is convenient to read updated
 ## _Requirements_
 - node.js version 14 and up
 
-Deploy: https://frontend-project-11-gold-nu.vercel.app
+## _Deploy_
+https://frontend-project-11-gold-nu.vercel.app
