@@ -8,8 +8,8 @@ export default (url, urls, i18nextInstance) => {
     mixed: {
       required: i18nextInstance.t('formValidationStatus.errors.required'),
       notOneOf: i18nextInstance.t('formValidationStatus.errors.rssExists'),
-    }
-  })
+    },
+  });
   const schema = yup
     .string()
     .required()

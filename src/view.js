@@ -24,12 +24,8 @@ const renderFeeds = (state, elements, i18nextInstance) => {
 
 const renderValidation = (state, elements, i18nextInstance) => {
   if (state.rssForm.errors === null) {
-    elements.input.classList.remove('is-invalid');
-    elements.feedback.classList.remove('text-danger');
     elements.feedback.textContent = i18nextInstance.t('formValidationStatus.success');
   } else {
-    elements.input.classList.add('is-invalid');
-    elements.feedback.classList.add('text-danger');
     elements.feedback.textContent = state.rssForm.errors;
   }
 };
@@ -73,6 +69,29 @@ const renderVisitedIds = (state, elements) => {
   elements.modal.link.setAttribute('href', currentPost.link);
 };
 
+const renderState = (state, elements) => {
+  switch (state.rssForm.state) {
+    case 'filling':
+      elements.button.disabled = false;
+      break;
+    case 'processing':
+      elements.button.disabled = true;
+      break;
+    case 'processed':
+      elements.button.disabled = false;
+      elements.input.classList.remove('is-invalid');
+      elements.feedback.classList.remove('text-danger');
+      break;
+    case 'failed':
+      elements.button.disabled = false;
+      elements.input.classList.add('is-invalid');
+      elements.feedback.classList.add('text-danger');
+      break;
+    default:
+      break;
+  }
+};
+
 export default (state, elements, i18nextInstance) => onChange(state, (path) => {
   switch (path) {
     case 'rssForm.errors':
@@ -86,6 +105,9 @@ export default (state, elements, i18nextInstance) => onChange(state, (path) => {
       break;
     case 'uiState.visitedIds':
       renderVisitedIds(state, elements);
+      break;
+    case 'rssForm.state':
+      renderState(state, elements);
       break;
     default:
       break;

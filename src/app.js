@@ -46,21 +46,19 @@ export default () => {
   const watchedState = render(state, elements, i18nextInstance);
 
   const updatePosts = () => {
-    const promises = state.feeds.map((feed) => {
-      return fetch(feed.url)
-        .then(({data}) => {
-          const [, receivedPosts] = parse(data.contents);
-          const oldPosts = state.posts.filter((post) => post.feedId === feed.id);
-          const newPosts = _.differenceBy(receivedPosts, oldPosts, 'link');
-          if (newPosts.length !== 0) {
-              const updatedPosts = receivedPosts.map((post) => ({ ...post, id: _.uniqueId, feedId: feed.id }));
-              watchedState.posts = [...updatedPosts, ...watchedState.posts];
-          }
-        })
-        .catch((e) => console.log(e))
-    });
+    const promises = state.feeds.map((feed) => fetch(feed.url)
+      .then(({ data }) => {
+        const [, recPosts] = parse(data.contents);
+        const oldPosts = state.posts.filter((post) => post.feedId === feed.id);
+        const newPosts = _.differenceBy(recPosts, oldPosts, 'link');
+        if (newPosts.length !== 0) {
+          const updatedPosts = recPosts.map((post) => ({ ...post, id: _.uniqueId, feedId: feed.id }));
+          watchedState.posts = [...updatedPosts, ...watchedState.posts];
+        }
+      })
+      .catch((e) => console.log(e)));
     Promise.all(promises)
-    .finally(() => setTimeout(() => updatePosts(watchedState), 5000));
+      .finally(() => setTimeout(() => updatePosts(watchedState), 5000));
   };
 
   elements.form.addEventListener('submit', (e) => {
@@ -82,18 +80,20 @@ export default () => {
         const newPosts = posts.map((post) => ({ ...post, id: _.uniqueId(), feedId: newFeed.id }));
         watchedState.posts = [...newPosts, ...watchedState.posts];
         watchedState.rssForm.errors = null;
-        watchedState.rssForm.state = 'success';
+        watchedState.rssForm.state = 'processed';
         elements.form.reset();
         elements.input.focus();
       })
       .catch((err) => {
-        watchedState.rssForm.valid = false;
+        watchedState.rssForm.state = 'failed';
         if (err.name === 'ValidationError') {
+          watchedState.rssForm.valid = false;
           watchedState.rssForm.errors = err.message;
         } else if (err.name === 'TypeError') {
+          watchedState.rssForm.valid = false;
           watchedState.rssForm.errors = i18nextInstance.t('formValidationStatus.errors.notValidRss');
         } else if (err.name === 'AxiosError') {
-          watchedState.rssForm.errors = i18nextInstance.t('formValidationStatus.errors.networkProblems')
+          watchedState.rssForm.errors = i18nextInstance.t('formValidationStatus.errors.networkProblems');
         }
       });
   });
@@ -105,7 +105,7 @@ export default () => {
     } else if (e.target.closest('a')) {
       window.open(e.target.href);
       watchedState.uiState.visitedIds.add(e.target.dataset.id);
-    };
+    }
   });
 
   setTimeout(() => updatePosts(), 5000);
