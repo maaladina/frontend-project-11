@@ -1,5 +1,3 @@
-import onChange from 'on-change';
-
 const renderFeeds = (state, elements, i18nextInstance) => {
   if (state.feeds.length !== 0) {
     elements.feeds.innerHTML = `
@@ -92,7 +90,7 @@ const renderState = (state, elements) => {
   }
 };
 
-export default (state, elements, i18nextInstance) => onChange(state, (path) => {
+export default (state, elements, path, i18nextInstance) => {
   switch (path) {
     case 'rssForm.errors':
       renderValidation(state, elements, i18nextInstance);
@@ -112,4 +110,4 @@ export default (state, elements, i18nextInstance) => onChange(state, (path) => {
     default:
       break;
   }
-});
+};

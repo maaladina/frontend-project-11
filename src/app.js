@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import i18next from 'i18next';
+import onChange from 'on-change';
 import validate from './validate.js';
 import fetch from './fetch.js';
 import render from './view.js';
@@ -43,16 +44,18 @@ export default () => {
     },
   });
 
-  const watchedState = render(state, elements, i18nextInstance);
+  const watchedState = onChange(state, (path) => {
+    render(state, elements, path, i18nextInstance);
+  });
 
   const updatePosts = () => {
     const promises = state.feeds.map((feed) => fetch(feed.url)
       .then(({ data }) => {
-        const [, recPosts] = parse(data.contents);
+        const [, posts] = parse(data.contents);
         const oldPosts = state.posts.filter((post) => post.feedId === feed.id);
-        const newPosts = _.differenceBy(recPosts, oldPosts, 'link');
+        const newPosts = _.differenceBy(posts, oldPosts, 'link');
         if (newPosts.length !== 0) {
-          const updatedPosts = recPosts.map((post) => ({ ...post, id: _.uniqueId, feedId: feed.id }));
+          const updatedPosts = posts.map((post) => ({ ...post, id: _.uniqueId, feedId: feed.id }));
           watchedState.posts = [...updatedPosts, ...watchedState.posts];
         }
       })
