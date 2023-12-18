@@ -43,17 +43,17 @@ export default () => {
       ru,
     },
   })
-  .then(() => {
-    yup.setLocale({
-      string: {
-        url: i18nextInstance.t('formValidationStatus.errors.notValidUrl'),
-      },
-      mixed: {
-        required: i18nextInstance.t('formValidationStatus.errors.required'),
-        notOneOf: i18nextInstance.t('formValidationStatus.errors.rssExists'),
-      },
+    .then(() => {
+      yup.setLocale({
+        string: {
+          url: i18nextInstance.t('formValidationStatus.errors.notValidUrl'),
+        },
+        mixed: {
+          required: i18nextInstance.t('formValidationStatus.errors.required'),
+          notOneOf: i18nextInstance.t('formValidationStatus.errors.rssExists'),
+        },
+      });
     });
-  });
 
   const watchedState = onChange(state, (path) => {
     render(state, elements, path, i18nextInstance);
