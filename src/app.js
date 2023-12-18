@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import i18next from 'i18next';
 import onChange from 'on-change';
-import validate from './validate.js';
-import fetch from './fetch.js';
+import axios from 'axios';
+import * as yup from 'yup';
 import render from './view.js';
 import parse from './parser.js';
 import ru from './locales/ru.js';
@@ -42,11 +42,39 @@ export default () => {
     resources: {
       ru,
     },
+  })
+  .then(() => {
+    yup.setLocale({
+      string: {
+        url: i18nextInstance.t('formValidationStatus.errors.notValidUrl'),
+      },
+      mixed: {
+        required: i18nextInstance.t('formValidationStatus.errors.required'),
+        notOneOf: i18nextInstance.t('formValidationStatus.errors.rssExists'),
+      },
+    });
   });
 
   const watchedState = onChange(state, (path) => {
     render(state, elements, path, i18nextInstance);
   });
+
+  const proxify = (url, base = 'https://allorigins.hexlet.app/get') => {
+    const newUrl = new URL(base);
+    const searchUrl = encodeURI(url);
+    newUrl.searchParams.set('disableCache', 'true');
+    newUrl.searchParams.set('url', searchUrl);
+    return newUrl;
+  };
+
+  const validate = (url, urls) => {
+    const schema = yup
+      .string()
+      .required()
+      .url()
+      .notOneOf(urls);
+    return schema.validate(url);
+  };
 
   const updatePosts = () => {
     const promises = state.feeds.map((feed) => fetch(feed.url)
@@ -74,7 +102,8 @@ export default () => {
       .then((validUrl) => {
         watchedState.rssForm.valid = true;
         watchedState.rssForm.state = 'processing';
-        return fetch(validUrl);
+        const response = axios.get(proxify(validUrl));
+        return response;
       })
       .then(({ data }) => {
         const [feed, posts] = parse(data.contents);
