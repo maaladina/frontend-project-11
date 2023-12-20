@@ -79,6 +79,8 @@ const renderState = (state, elements) => {
       elements.button.disabled = false;
       elements.input.classList.remove('is-invalid');
       elements.feedback.classList.remove('text-danger');
+      elements.form.reset();
+      elements.input.focus();
       break;
     case 'failed':
       elements.button.disabled = false;
