@@ -16,16 +16,15 @@ const proxify = (url, base = 'https://allorigins.hexlet.app/get') => {
 };
 
 const loadFeed = (watchedState, url) => axios.get(proxify(url))
-    .then(({ data }) => {
-      const [feed, posts] = parse(data.contents);
-      const newFeed = { ...feed, id: _.uniqueId(), url };
-      watchedState.feeds = [newFeed, ...watchedState.feeds];
-      const newPosts = posts.map((post) => ({ ...post, id: _.uniqueId(), feedId: newFeed.id }));
-      watchedState.posts = [...newPosts, ...watchedState.posts];
-      watchedState.rssForm.errors = null;
-      watchedState.rssForm.state = 'processed';
-    });
-
+  .then(({ data }) => {
+    const [feed, posts] = parse(data.contents);
+    const newFeed = { ...feed, id: _.uniqueId(), url };
+    watchedState.feeds = [newFeed, ...watchedState.feeds];
+    const newPosts = posts.map((post) => ({ ...post, id: _.uniqueId(), feedId: newFeed.id }));
+    watchedState.posts = [...newPosts, ...watchedState.posts];
+    watchedState.rssForm.errors = null;
+    watchedState.rssForm.state = 'processed';
+  });
 
 const updatePosts = (watchedState) => {
   const promises = watchedState.feeds.map((feed) => axios.get(proxify((feed.url)))
@@ -93,7 +92,7 @@ export default () => {
       const watchedState = onChange(state, (path) => {
         render(state, elements, path, i18nextInstance);
       });
-    
+
       const validate = (url, urls) => {
         const schema = yup
           .string()
@@ -102,7 +101,7 @@ export default () => {
           .notOneOf(urls);
         return schema.validate(url);
       };
-    
+
       elements.form.addEventListener('submit', (e) => {
         e.preventDefault();
         watchedState.rssForm.state = 'filling';
@@ -113,14 +112,14 @@ export default () => {
           .then((validUrl) => {
             watchedState.rssForm.valid = true;
             watchedState.rssForm.state = 'processing';
-            return loadFeed(watchedState, validUrl)
+            return loadFeed(watchedState, validUrl);
           })
           .catch((err) => {
             watchedState.rssForm.state = 'failed';
             if (err.name === 'TypeError') {
               watchedState.rssForm.valid = false;
               watchedState.rssForm.errors = i18nextInstance.t('formValidationStatus.errors.notValidRss');
-            } else if (err.name == 'ValidationError') {
+            } else if (err.name === 'ValidationError') {
               watchedState.rssForm.valid = false;
               watchedState.rssForm.errors = err.message;
             } else if (err.name === 'AxiosError') {
@@ -128,11 +127,11 @@ export default () => {
             }
           });
       });
-    
+
       elements.posts.addEventListener('click', (e) => {
-          watchedState.uiState.visitedIds.add(e.target.dataset.id);
+        watchedState.uiState.visitedIds.add(e.target.dataset.id);
       });
-    
+
       setTimeout(() => updatePosts(watchedState), 5000);
     });
 };
