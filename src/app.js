@@ -15,7 +15,7 @@ const proxify = (url, base = 'https://allorigins.hexlet.app/get') => {
   return newUrl;
 };
 
-const loadFeed = (watchedState, url) => axios.get(proxify(url))
+const loadFeed = (watchedState, url, i18nextInstance) => axios.get(proxify(url))
   .then(({ data }) => {
     const [feed, posts] = parse(data.contents);
     const newFeed = { ...feed, id: _.uniqueId(), url };
@@ -24,6 +24,15 @@ const loadFeed = (watchedState, url) => axios.get(proxify(url))
     watchedState.posts = [...newPosts, ...watchedState.posts];
     watchedState.rssForm.errors = null;
     watchedState.rssForm.state = 'processed';
+  })
+  .catch((err) => {
+    watchedState.rssForm.state = 'failed';
+    if (err.isParsingError) {
+      watchedState.rssForm.valid = false;
+      watchedState.rssForm.errors = i18nextInstance.t('formValidationStatus.errors.notValidRss');
+    } else if (err.isAxiosError) {
+      watchedState.rssForm.errors = i18nextInstance.t('formValidationStatus.errors.networkProblems');
+    }
   });
 
 const updatePosts = (watchedState) => {
@@ -104,27 +113,19 @@ export default () => {
 
       elements.form.addEventListener('submit', (e) => {
         e.preventDefault();
-        watchedState.rssForm.state = 'filling';
+        watchedState.rssForm.state = 'processing';
         const formData = new FormData(e.target);
         const url = formData.get('url');
         const urls = watchedState.feeds.map((feed) => feed.url);
         validate(url, urls, i18nextInstance)
           .then((validUrl) => {
             watchedState.rssForm.valid = true;
-            watchedState.rssForm.state = 'processing';
-            return loadFeed(watchedState, validUrl);
+            return loadFeed(watchedState, validUrl, i18nextInstance);
           })
           .catch((err) => {
             watchedState.rssForm.state = 'failed';
-            if (err.name === 'TypeError') {
-              watchedState.rssForm.valid = false;
-              watchedState.rssForm.errors = i18nextInstance.t('formValidationStatus.errors.notValidRss');
-            } else if (err.name === 'ValidationError') {
-              watchedState.rssForm.valid = false;
-              watchedState.rssForm.errors = err.message;
-            } else if (err.name === 'AxiosError') {
-              watchedState.rssForm.errors = i18nextInstance.t('formValidationStatus.errors.networkProblems');
-            }
+            watchedState.rssForm.valid = false;
+            watchedState.rssForm.errors = err.message;
           });
       });
 
