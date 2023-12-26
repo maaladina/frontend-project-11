@@ -16,7 +16,7 @@ const renderFeeds = (state, elements, i18nextInstance) => {
     const li = document.createElement('li');
     li.classList.add('list-group-item', 'border-0', 'border-end-0');
     const h3 = document.createElement('h3');
-    h3.classList.add('h6','m-0');
+    h3.classList.add('h6', 'm-0');
     h3.textContent = feed.title;
     li.append(h3);
     const p = document.createElement('p');
