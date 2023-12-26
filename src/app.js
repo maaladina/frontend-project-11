@@ -122,7 +122,7 @@ export default () => {
         validate(url, urls)
           .then((validUrl) => {
             watchedState.rssForm.valid = true;
-            loadFeed(watchedState, validUrl, i18nextInstance);
+            loadFeed(watchedState, validUrl);
           })
           .catch((err) => {
             watchedState.rssForm.state = 'failed';
