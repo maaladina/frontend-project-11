@@ -8,6 +8,7 @@ export default {
         notValidRss: 'Ресурс не содержит валидный RSS',
         rssExists: 'RSS уже существует',
         networkProblems: 'Ошибка сети',
+        unknownError: 'Что-то пошло не так',
       },
     },
     feeds: 'Фиды',

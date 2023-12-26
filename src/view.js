@@ -1,57 +1,76 @@
 const renderFeeds = (state, elements, i18nextInstance) => {
-  if (state.feeds.length !== 0) {
-    elements.feeds.innerHTML = `
-            <div class="card border-0">
-                <div class="card-body"><h2 class="card-title h4">${i18nextInstance.t('feeds')}</h2></div>
-                <ul class="list-group border-0 rounded-0">
-                </ul>
-            </div>
-        `;
-    const ul = elements.feeds.querySelector('ul');
-    const feedHTML = [];
-    state.feeds.forEach((feed) => feedHTML.push(`<li class="list-group-item border-0 border-end-0">
-      <h3 class="h6 m-0">${feed.title}</h3>
-      <p class="m-0 small text-black-50">${feed.description}</p></li>
-    `));
-    const ulHTML = feedHTML.join('');
-    ul.innerHTML = ulHTML;
-  } else {
-    elements.feeds.innerHTML = '';
-  }
+  elements.feeds.innerHTML = '';
+  const div = document.createElement('div');
+  div.classList.add('card', 'border-0');
+  elements.feeds.prepend(div);
+  const title = document.createElement('div');
+  title.classList.add('card-body');
+  div.append(title);
+  const h2 = document.createElement('h2');
+  h2.classList.add('card-title', 'h4');
+  h2.textContent = i18nextInstance.t('feeds');
+  title.prepend(h2);
+  const ul = document.createElement('ul');
+  ul.classList.add('list-group', 'border-0', 'rounded-0');
+  state.feeds.forEach((feed) => {
+    const li = document.createElement('li');
+    li.classList.add('list-group-item', 'border-0', 'border-end-0');
+    const h3 = document.createElement('h3');
+    h3.classList.add('h6','m-0');
+    h3.textContent = feed.title;
+    li.append(h3);
+    const p = document.createElement('p');
+    p.classList.add('m-0', 'small', 'text-black-50');
+    p.textContent = feed.description;
+    li.append(p);
+    ul.append(li);
+  });
+  div.append(ul);
 };
 
-const renderValidation = (state, elements, i18nextInstance) => {
-  if (state.rssForm.errors === null) {
-    elements.feedback.textContent = i18nextInstance.t('formValidationStatus.success');
-  } else {
-    elements.feedback.textContent = state.rssForm.errors;
+const renderError = (state, elements, i18nextInstance) => {
+  if (state.rssForm.error) {
+    elements.feedback.textContent = i18nextInstance.t(state.rssForm.error);
   }
 };
 
 const renderPosts = (state, elements, i18nextInstance) => {
-  if (state.posts.length !== 0) {
-    elements.posts.innerHTML = `
-    <div class="card border-0">
-      <div class="card-body"><h2 class="card-title h4">${i18nextInstance.t('posts.title')}</h2></div>
-      <ul class="list-group border-0 rounded-0">
-      </ul>
-    </div>
-    `;
-    const ul = elements.posts.querySelector('ul');
-    const postsHTML = [];
-    state.posts.forEach((post) => {
-      const postClass = state.uiState.visitedIds.has(post.id) ? 'fw-normal link-secondary' : 'fw-bold';
-      postsHTML.push(`
-      <li class="list-group-item d-flex justify-content-between align-items-start border-0 border-end-0">
-        <a href="${post.link}" class="${postClass}" data-id="${post.id}" target="_blank" rel="noopener noreferrer">${post.title}</a>
-        <button type="button" class="btn btn-outline-primary btn-sm" data-id="${post.id}" data-bs-toggle="modal" data-bs-target="#modal">${i18nextInstance.t('posts.button')}</button>
-      </li>
-      `);
-    });
-    ul.innerHTML = postsHTML.join('');
-  } else {
-    elements.posts.innerHTML = '';
-  }
+  elements.posts.innerHTML = '';
+  const div = document.createElement('div');
+  div.classList.add('card', 'border-0');
+  elements.posts.prepend(div);
+  const title = document.createElement('div');
+  title.classList.add('card-body');
+  div.append(title);
+  const h2 = document.createElement('h2');
+  h2.classList.add('card-title', 'h4');
+  h2.textContent = i18nextInstance.t('posts.title');
+  title.prepend(h2);
+  const ul = document.createElement('ul');
+  ul.classList.add('list-group', 'border-0', 'rounded-0');
+  state.posts.forEach((post) => {
+    const postClass = state.uiState.visitedIds.has(post.id) ? 'fw-normal link-secondary' : 'fw-bold';
+    const li = document.createElement('li');
+    li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start', 'border-0', 'border-end-0');
+    const a = document.createElement('a');
+    a.setAttribute('class', postClass);
+    a.setAttribute('href', post.link);
+    a.dataset.id = post.id;
+    a.setAttribute('target', '_blank');
+    a.setAttribute('rel', 'noopener noreferrer');
+    a.textContent = post.title;
+    li.append(a);
+    const button = document.createElement('button');
+    button.setAttribute('type', 'button');
+    button.classList.add('btn', 'btn-outline-primary', 'btn-sm');
+    button.dataset.id = post.id;
+    button.dataset.bsToggle = 'modal';
+    button.dataset.bsTarget = '#modal';
+    button.textContent = i18nextInstance.t('posts.button');
+    li.append(button);
+    ul.append(li);
+  });
+  div.append(ul);
 };
 
 const renderVisitedIds = (state, elements) => {
@@ -67,7 +86,7 @@ const renderVisitedIds = (state, elements) => {
   elements.modal.link.setAttribute('href', currentPost.link);
 };
 
-const renderState = (state, elements) => {
+const renderState = (state, elements, i18nextInstance) => {
   switch (state.rssForm.state) {
     case 'filling':
       elements.button.disabled = false;
@@ -79,6 +98,7 @@ const renderState = (state, elements) => {
       elements.button.disabled = false;
       elements.input.classList.remove('is-invalid');
       elements.feedback.classList.remove('text-danger');
+      elements.feedback.textContent = i18nextInstance.t('formValidationStatus.success');
       elements.form.reset();
       elements.input.focus();
       break;
@@ -94,8 +114,8 @@ const renderState = (state, elements) => {
 
 export default (state, elements, path, i18nextInstance) => {
   switch (path) {
-    case 'rssForm.errors':
-      renderValidation(state, elements, i18nextInstance);
+    case 'rssForm.error':
+      renderError(state, elements, i18nextInstance);
       break;
     case 'feeds':
       renderFeeds(state, elements, i18nextInstance);
@@ -107,7 +127,7 @@ export default (state, elements, path, i18nextInstance) => {
       renderVisitedIds(state, elements);
       break;
     case 'rssForm.state':
-      renderState(state, elements);
+      renderState(state, elements, i18nextInstance);
       break;
     default:
       break;
