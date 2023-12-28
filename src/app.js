@@ -26,7 +26,6 @@ const loadFeed = (watchedState, url) => axios.get(proxify(url))
     watchedState.rssForm.state = 'processed';
   })
   .catch((err) => {
-    watchedState.rssForm.state = 'failed';
     if (err.isParsingError) {
       watchedState.rssForm.valid = false;
       watchedState.rssForm.error = 'formValidationStatus.errors.notValidRss';
@@ -35,6 +34,7 @@ const loadFeed = (watchedState, url) => axios.get(proxify(url))
     } else {
       watchedState.rssForm.error = 'formValidationStatus.errors.unknownError';
     }
+    watchedState.rssForm.state = 'failed';
   });
 
 const updatePosts = (watchedState) => {
@@ -76,6 +76,7 @@ export default () => {
     },
     uiState: {
       visitedIds: new Set(),
+      modalId: null,
     },
     feeds: [],
     posts: [],
@@ -125,14 +126,15 @@ export default () => {
             loadFeed(watchedState, validUrl);
           })
           .catch((err) => {
-            watchedState.rssForm.state = 'failed';
             watchedState.rssForm.valid = false;
             watchedState.rssForm.error = err.message;
+            watchedState.rssForm.state = 'failed';
           });
       });
 
       elements.posts.addEventListener('click', (e) => {
         if (e.target.dataset.id) {
+          watchedState.uiState.modalId = e.target.dataset.id;
           watchedState.uiState.visitedIds.add(e.target.dataset.id);
         }
       });

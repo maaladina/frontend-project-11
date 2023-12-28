@@ -28,12 +28,6 @@ const renderFeeds = (state, elements, i18nextInstance) => {
   div.append(ul);
 };
 
-const renderError = (state, elements, i18nextInstance) => {
-  if (state.rssForm.error) {
-    elements.feedback.textContent = i18nextInstance.t(state.rssForm.error);
-  }
-};
-
 const renderPosts = (state, elements, i18nextInstance) => {
   elements.posts.innerHTML = '';
   const div = document.createElement('div');
@@ -73,18 +67,20 @@ const renderPosts = (state, elements, i18nextInstance) => {
   div.append(ul);
 };
 
-const renderVisitedIds = (state, elements) => {
+const renderVisitedIds = (state) => {
   const visitedIds = [...state.uiState.visitedIds];
   const currentId = visitedIds[visitedIds.length - 1];
   const currentLink = document.querySelector(`a[data-id="${currentId}"]`);
   currentLink.classList.remove('fw-bold');
   currentLink.classList.add('fw-normal', 'link-secondary');
+};
 
-  const currentPost = state.posts.find((post) => post.id === currentId);
+const renderModal = (state, elements) => {
+  const currentPost = state.posts.find((post) => post.id === state.uiState.modalId);
   elements.modal.title.textContent = currentPost.title;
   elements.modal.body.textContent = currentPost.description;
   elements.modal.link.setAttribute('href', currentPost.link);
-};
+}
 
 const renderState = (state, elements, i18nextInstance) => {
   switch (state.rssForm.state) {
@@ -106,6 +102,7 @@ const renderState = (state, elements, i18nextInstance) => {
       elements.button.disabled = false;
       elements.input.classList.add('is-invalid');
       elements.feedback.classList.add('text-danger');
+      elements.feedback.textContent = i18nextInstance.t(state.rssForm.error);
       break;
     default:
       break;
@@ -114,9 +111,6 @@ const renderState = (state, elements, i18nextInstance) => {
 
 export default (state, elements, path, i18nextInstance) => {
   switch (path) {
-    case 'rssForm.error':
-      renderError(state, elements, i18nextInstance);
-      break;
     case 'feeds':
       renderFeeds(state, elements, i18nextInstance);
       break;
@@ -124,7 +118,10 @@ export default (state, elements, path, i18nextInstance) => {
       renderPosts(state, elements, i18nextInstance);
       break;
     case 'uiState.visitedIds':
-      renderVisitedIds(state, elements);
+      renderVisitedIds(state);
+      break;
+    case 'uiState.modalId':
+      renderModal(state, elements);
       break;
     case 'rssForm.state':
       renderState(state, elements, i18nextInstance);
