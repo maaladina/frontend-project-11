@@ -80,7 +80,7 @@ const renderModal = (state, elements) => {
   elements.modal.title.textContent = currentPost.title;
   elements.modal.body.textContent = currentPost.description;
   elements.modal.link.setAttribute('href', currentPost.link);
-}
+};
 
 const renderState = (state, elements, i18nextInstance) => {
   switch (state.rssForm.state) {
