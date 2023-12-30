@@ -27,7 +27,6 @@ const loadFeed = (watchedState, url) => axios.get(proxify(url))
   })
   .catch((err) => {
     if (err.isParsingError) {
-      watchedState.rssForm.valid = false;
       watchedState.rssForm.error = 'formValidationStatus.errors.notValidRss';
     } else if (err.isAxiosError) {
       watchedState.rssForm.error = 'formValidationStatus.errors.networkProblems';
@@ -72,7 +71,6 @@ export default () => {
     rssForm: {
       state: 'filling',
       error: null,
-      valid: true,
     },
     uiState: {
       visitedIds: new Set(),
@@ -121,12 +119,8 @@ export default () => {
         const url = formData.get('url');
         const urls = watchedState.feeds.map((feed) => feed.url);
         validate(url, urls)
-          .then((validUrl) => {
-            watchedState.rssForm.valid = true;
-            loadFeed(watchedState, validUrl);
-          })
+          .then((validUrl) => loadFeed(watchedState, validUrl))
           .catch((err) => {
-            watchedState.rssForm.valid = false;
             watchedState.rssForm.error = err.message;
             watchedState.rssForm.state = 'failed';
           });
