@@ -43,7 +43,7 @@ const updatePosts = (watchedState) => {
       const oldPosts = watchedState.posts.filter((post) => post.feedId === feed.id);
       const newPosts = _.differenceBy(posts, oldPosts, 'link');
       if (newPosts.length !== 0) {
-        const updatedPosts = posts.map((post) => ({ ...post, id: _.uniqueId, feedId: feed.id }));
+        const updatedPosts = newPosts.map((newPost) => ({ ...newPost, id: _.uniqueId, feedId: feed.id }));
         watchedState.posts = [...updatedPosts, ...watchedState.posts];
       }
     })
